@@ -23,6 +23,7 @@ class ProjectInput:
     name: str
     typology: str
     floors: int
+    floor_height: float
     terrain_geojson: dict[str, Any]
     urban: UrbanParams
     scenarios: list[dict[str, float]] = field(default_factory=list)

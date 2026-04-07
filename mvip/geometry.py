@@ -8,7 +8,6 @@ from mvip.models import ProjectInput
 
 
 def _buildable_polygon(poly, front: float, side: float, back: float):
-    # Simplificação: usa o maior recuo como buffer uniforme para manter cálculo estável.
     inset = max(front, side, back)
     result = poly.buffer(-inset)
     if result.is_empty:
@@ -35,6 +34,7 @@ def generate_volume(project: ProjectInput) -> dict:
             "gross_area": 0.0,
             "used_height": 0.0,
             "steps": [],
+            "floor_height": project.floor_height,
             "urban": asdict(project.urban),
         }
 
@@ -44,7 +44,7 @@ def generate_volume(project: ProjectInput) -> dict:
     occupancy_limit = terrain_area * project.urban.occupancy_rate_max
     max_floor_area = min(buildable_area, floor_area_by_ca, occupancy_limit)
 
-    floor_height = 3.0
+    floor_height = max(project.floor_height, 2.2)
     used_height = min(project.floors * floor_height, project.urban.max_height)
     total_possible_floors = int(project.urban.max_height // floor_height)
     effective_floors = min(project.floors, max(total_possible_floors, 1))
@@ -54,14 +54,15 @@ def generate_volume(project: ProjectInput) -> dict:
     current = buildable
     for i in range(effective_floors):
         if i > 0 and i % 6 == 0:
-            current = current.buffer(-1.5)
+            current = current.buffer(-1.0)
         if current.is_empty:
             break
         steps.append(
             {
                 "floor": i + 1,
                 "area": float(current.area),
-                "height": (i + 1) * floor_height,
+                "height": round((i + 1) * floor_height, 2),
+                "side_hint": float(current.area) ** 0.5,
             }
         )
 
@@ -72,6 +73,7 @@ def generate_volume(project: ProjectInput) -> dict:
         "gross_area": gross_area,
         "used_height": used_height,
         "effective_floors": effective_floors,
+        "floor_height": floor_height,
         "steps": steps,
         "urban": asdict(project.urban),
     }
@@ -86,10 +88,12 @@ def simulate_scenarios(project: ProjectInput) -> list[dict]:
         original_ca = project.urban.ca
         original_h = project.urban.max_height
         original_rear = project.urban.setback_back
+        original_floor_height = project.floor_height
 
         project.urban.ca = scenario.get("ca", original_ca)
         project.urban.max_height = scenario.get("max_height", original_h)
         project.urban.setback_back = scenario.get("setback_back", original_rear)
+        project.floor_height = scenario.get("floor_height", original_floor_height)
 
         result = generate_volume(project)
         scenarios.append({"name": f"Cenário {idx}", **result})
@@ -97,5 +101,6 @@ def simulate_scenarios(project: ProjectInput) -> list[dict]:
         project.urban.ca = original_ca
         project.urban.max_height = original_h
         project.urban.setback_back = original_rear
+        project.floor_height = original_floor_height
 
     return scenarios

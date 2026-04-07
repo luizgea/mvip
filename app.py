@@ -9,7 +9,7 @@ from mvip.compliance import check_compliance
 from mvip.exporters import export_dwg, export_volume_png
 from mvip.geometry import generate_volume, simulate_scenarios
 from mvip.models import ProjectInput, UrbanParams
-from mvip.pbh import fetch_pbh_geodata
+from mvip.pbh import fetch_lot_data, fetch_pbh_geodata
 from mvip.report import build_fire_pdf, build_report_pdf, create_comparison_chart
 from mvip.storage import (
     create_project,
@@ -30,6 +30,7 @@ def _project_from_payload(payload: dict) -> ProjectInput:
         name=payload["name"],
         typology=payload["typology"],
         floors=int(payload["floors"]),
+        floor_height=float(payload.get("floor_height", 3.0)),
         terrain_geojson=payload["terrain_geojson"],
         urban=urban,
         scenarios=payload.get("scenarios", []),
@@ -59,6 +60,14 @@ def pbh_data():
     lat = float(payload.get("lat", -19.92))
     lon = float(payload.get("lon", -43.94))
     return jsonify(fetch_pbh_geodata(lat, lon))
+
+
+@app.get("/api/lote/<string:lot_id>")
+def lot_data(lot_id: str):
+    data = fetch_lot_data(lot_id)
+    if not data:
+        return jsonify({"error": "Lote não encontrado no stub", "known": ["LOTE-001", "LOTE-002"]}), 404
+    return jsonify(data)
 
 
 @app.post("/api/projects")
@@ -114,6 +123,7 @@ def export_all():
         input_params={
             "Tipologia": payload["typology"],
             "Pavimentos": payload["floors"],
+            "Pé-direito": payload.get("floor_height", 3.0),
             "CA": payload["urban"]["ca"],
             "Altura máx": payload["urban"]["max_height"],
         },
