@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MViP</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>MViP — Metodologia de Viabilidade Paramétrica</h1>
+  </header>
+
+  <main>
+    <nav class="tabs">
+      <button class="tab active" data-tab="terreno">Terreno & Urbanismo</button>
+      <button class="tab" data-tab="volumetria">Volumetria</button>
+      <button class="tab" data-tab="conformidade">Conformidade</button>
+      <button class="tab" data-tab="relatorio">Relatório</button>
+    </nav>
+
+    <section id="terreno" class="tab-panel active">
+      <h2>Entrada de Dados</h2>
+      <div class="actions">
+        <input id="lot-id" placeholder="Ex.: LOTE-001" />
+        <button id="btn-lot">Buscar lote</button>
+      </div>
+      <small>Stub disponível para: <b>LOTE-001</b> e <b>LOTE-002</b>.</small>
+
+      <div class="grid">
+        <label>Nome do projeto <input id="name" value="Projeto MViP" /></label>
+        <label>Tipologia
+          <select id="typology">
+            <option>residencial</option>
+            <option>comercial</option>
+            <option>mista</option>
+          </select>
+        </label>
+        <label>Pavimentos <input id="floors" type="number" min="1" max="60" value="8" /></label>
+        <label>Pé-direito (m) <input id="floor_height" type="number" step="0.1" min="2.2" max="6" value="3.0" /></label>
+        <label>CA <input id="ca" type="number" step="0.1" value="2.0" /></label>
+        <label>TDC <input id="tdc" type="number" step="0.1" value="0.0" /></label>
+        <label>ODC <input id="odc" type="number" step="0.1" value="0.0" /></label>
+        <label>Recuo frontal <input id="setback_front" type="number" step="0.1" value="4.0" /></label>
+        <label>Recuo lateral <input id="setback_side" type="number" step="0.1" value="2.0" /></label>
+        <label>Recuo fundos <input id="setback_back" type="number" step="0.1" value="3.0" /></label>
+        <label>Altura máxima (m) <input id="max_height" type="number" step="0.1" value="27" /></label>
+        <label>Cota min <input id="altimetry_min" type="number" step="0.1" value="850" /></label>
+        <label>Cota max <input id="altimetry_max" type="number" step="0.1" value="890" /></label>
+        <label>TO máxima <input id="occupancy_rate_max" type="number" step="0.05" value="0.6" /></label>
+      </div>
+
+      <h3>Sliders de ajuste rápido</h3>
+      <div class="grid sliders">
+        <label>Pavimentos <input id="s-floors" type="range" min="1" max="30" value="8" /></label>
+        <label>Pé-direito <input id="s-floor-height" type="range" min="2.2" max="5.0" step="0.1" value="3.0" /></label>
+        <label>Recuo frontal <input id="s-front" type="range" min="1.5" max="10" step="0.1" value="4.0" /></label>
+        <label>Recuo lateral <input id="s-side" type="range" min="1.5" max="10" step="0.1" value="2.0" /></label>
+        <label>Recuo fundos <input id="s-back" type="range" min="1.5" max="10" step="0.1" value="3.0" /></label>
+      </div>
+
+      <h3>Terreno (GeoJSON)</h3>
+      <textarea id="geojson" rows="10"></textarea>
+      <div class="actions">
+        <button id="btn-pbh">Buscar zoneamento PBH (stub)</button>
+        <button id="btn-analyze">Processar volumetria paramétrica</button>
+      </div>
+      <pre id="pbh-result"></pre>
+    </section>
+
+    <section id="volumetria" class="tab-panel">
+      <h2>Volumetria</h2>
+      <div id="volume-result"></div>
+      <svg id="volume-svg" width="620" height="340"></svg>
+      <img id="volume-preview" alt="Imagem volumétrica" />
+    </section>
+
+    <section id="conformidade" class="tab-panel">
+      <h2>Conformidade</h2>
+      <div id="compliance-result"></div>
+    </section>
+
+    <section id="relatorio" class="tab-panel">
+      <h2>Relatórios e Exportações</h2>
+      <div class="actions">
+        <button id="btn-save">Salvar projeto (CRUD)</button>
+        <button id="btn-export">Gerar relatório PDF + DWG + PNG</button>
+      </div>
+      <div id="projects"></div>
+      <div id="export-result"></div>
+      <img id="chart-preview" alt="Gráfico de cenários" />
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
